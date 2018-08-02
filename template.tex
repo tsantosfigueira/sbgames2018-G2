@@ -12,6 +12,8 @@
 \usepackage{times}
 \usepackage[utf8]{inputenc}
 
+\usepackage{placeins}
+
 %% We encourage the use of mathptmx for consistent usage of times font
 %% throughout the proceedings. However, if you encounter conflicts
 %% with other math-related packages, you may want to disable it.
@@ -70,7 +72,7 @@ $^{3}$Company C, Department, Country}
 
 %% do not uncomment this; use the \firstsection above
 %%\section{Introduction} 
-Jogos desenvolvidos na \textit{Unity} seguem uma \textit{pipeline} gráfica onde, em linhas gerais, a CPU (\textit{central processing unit}) é responsável por transmitir informações sobre elementos gráficos à GPU (\textit{graphics processing unit}) através do estágio de aplicação, onde os \textit{assets} gráficos, como modelos 3D e texturas, são carregados na VRAM (\textit{video random access memory}). Posteriormente, durante o estágio de geometria, os diferentes objetos que devem ser renderizados, seus respectivos posicionamentos e demais informes visuais relevantes são tratados pela GPU e no estágio de rasterização são convertidos em imagem\cite{akenine2008real}.
+Jogos desenvolvidos na \textit{Unity} seguem uma \textit{pipeline} gráfica onde, em linhas gerais, a CPU (\textit{central processing unit}) é responsável por transmitir informações sobre elementos gráficos à GPU (\textit{graphics processing unit}) através do estágio de aplicação, onde os \textit{assets} gráficos, como modelos 3D e texturas, são carregados na VRAM (\textit{video random access memory}). Posteriormente, durante o estágio de geometria, os diferentes objetos que devem ser renderizados, seus respectivos posicionamentos e demais informes visuais relevantes são tratados pela GPU e no estágio de rasterização são convertidos em imagem \cite{akenine2008real}.
 
 % Contextualizar a Realidade Virtual e Controladores
 Em outro âmbito, os controles ou \textit{joysticks} são uma das formas de interação com dispositivos de realidade virtual, no entanto, são passíveis de ruídos devido à presença de sensores baseados em magnetômetros, originando comportamentos indesejados como \textit{jittering} durante a leitura dos dados. 
@@ -107,6 +109,8 @@ Propomos uma arquitetura de duas camadas respectivamente responsáveis pelo gere
 
 A segunda camada envolve um \textit{shader}, código executado diretamente na unidade de processamento gráfico (GPU, em inglês), incumbido de renderizar todos os itens apresentados no dispositivo de saída, que incluem o plano de fundo, o objeto coletável circular bem como os quadriláteros que representam o personagem ou a \textit{snake}.
 
+Em outras palavras, a camada lógica gerencia a colisão e movimentação da \textit{snake}; seleciona o caminho mais promissor acrescido de um fator randômico; além de efetivamente aplicar o filtro de Kalman às entradas advindas do controle. A camada de visualização, por outro lado, é responsável pela renderização de todos os elementos dispostos no dispositivo de saída, isto é, a CPU não tem responsabilidade sobre estes objetos.
+
 %-------------------------------------------------------------------------------------------------
 \section{Realidade Virtual em uma Esfera Invertida} \label{sec:invertedsphere}
 
@@ -123,6 +127,71 @@ Para este trabalho, preferiu-se a segunda abordagem devido a possibilidade de us
 \begin{equation}
 R^2 \leftarrow R^3 : (\lambda, \theta) \rightarrow (x, y, z)
 \label{equation1}
+\end{equation}
+
+% 2 - Mapeamento de UV em uma esfera invertida
+Para calcular as posições dos vértices da esfera, dada uma quantidade de valores de latitude $N_{latitude}$ e uma quantidade de valores de longitude $N_{longitude}$, define-se um valor $R_{longitude}$ como o tamanho angular de longitude de uma secção transversal da esfera, tal como visto na equação \ref{equation1}.
+
+\begin{equation}
+R_{longitude} = \frac{2 \pi}{N_{longitude}}
+\label{equation1}
+\end{equation}
+
+O tamanho angular total de uma quantidade de $i$ de valores de longitude pode ser dada pela equação \ref{equation2}.
+
+\begin{equation}
+\alpha_{i} = i * R_{longitude}
+\label{equation2}
+\end{equation}
+
+Nas equações \ref{equation3} e \ref{equation4} definem-se as posições X e Z de pontos da esfera pertencentes a uma secção transversal da esfera que possui raio $D$.
+
+\begin{equation}
+x_{i} = D * \sin(\alpha_{i})
+\label{equation3}
+\end{equation}
+
+\begin{equation}
+z_{i} = D * \cos(\alpha_{i})
+\label{equation4}
+\end{equation}
+
+Em um corte longitudinal, é possível perceber que o raio $D$ da secção transversal é variável ao longo da altura da esfera. Determina-se então um valor $R$ como o tamanho angular de um valor de latitude da esfera, tal como visto na equação \ref{equation5}.
+
+\begin{equation}
+R_{latitude} = \frac{\pi}{ N_{latitude}}
+\label{equation5}
+\end{equation}
+
+O tamanho angular total de uma quantidade de $i$ de valores de latitude pode ser dado pela equação \ref{equation6}.
+
+\begin{equation}
+\alpha_{latitude} = i * R_{latitude}
+\label{equation6}
+\end{equation}
+
+A posição Y dos pontos da esfera, considerando raio unitário, pode ser dada pela equação \ref{equation7}.
+\begin{equation}
+y_{i} = \cos(\alpha_{latitude})
+\label{equation7}
+\end{equation}
+
+O raio $D_{yi}$ obtido em uma secção transversal na latitude $i$ é definido na equação \ref{equation8} como:
+\begin{equation}
+D_{yi} = 2 * \sin(\alpha_{yi})
+\label{equation8}
+\end{equation}
+
+Aplicando-se a equação \ref{equation8} nas equações \ref{equation3} e \ref{equation4} obtém-se as posições X e Z dos vértices da esfera em função de suas coordenadas de longitude e latitude.
+
+\begin{equation}
+x_{i} = 2 * \sin(\alpha_{latitude}) * \sin(\alpha_{longitude})
+\label{equation9}
+\end{equation}
+
+\begin{equation}
+z_{i} = 2 * \sin(\alpha_{latitude}) * \cos(\alpha_{longitude})
+\label{equation10}
 \end{equation}
 
 %-------------------------------------------------------------------------------------------------
@@ -180,6 +249,8 @@ Na figura \ref{fig:filter01} e \ref{fig:filter02} verifica-se que a linha azul f
 \label{fig:filter02}
 \end{figure}
 
+\FloatBarrier % this prevents problems with misplaced pictures
+
 A figura \ref{fig:chart_noise} mostra o gráfico da velocidade do curso ao longo da execução da aplicação. Ao comparar com o gráfico da figura \ref{fig:chart_filtered} gerado na mesma execução mas com o cursor filtrado, observamos que este último possui uma curva mais suave, indicando que o filtro de Kalman foi capaz de filtrar o ruído e assim suavizando o posicionamento capturado pelo controle.
 
 \begin{figure}[h!]
@@ -195,7 +266,7 @@ A figura \ref{fig:chart_noise} mostra o gráfico da velocidade do curso ao longo
 \caption{Gráfico da velocidade filtrada do curso ao longo de uma execução da aplicação}
 \label{fig:chart_filtered}
 \end{figure}
-
+\FloatBarrier
 %-------------------------------------------------------------------------------------------------
 \section{Conclusão} \label{sec:conclusion}
 

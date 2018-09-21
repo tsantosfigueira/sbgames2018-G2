@@ -30,28 +30,12 @@
 
 \title{VRSnake: Aplicação do Filtro de Kalman em um Jogo de Realidade Virtual com Visualização Baseada em Shader}
 
-%% Authors are listed in up to three columns as necessary
-%% with a footnote referring to a single e-mail contact.
-%% Affiliations are placed after the authors, one per line
-%% with superscript numbers used to link them to authors
-
-%% Single author:
-%%\author{Single author name\thanks{e-mail: email@somewhere.com}}
-%%\affiliation{\scriptsize University A}
-
-%% Multiple authors with single affiliation:
-%%\author{First author\thanks{e-mail: email@somewhere.com} %
-%%\and Second author %
-%%\and Third author}
-%%\affiliation{\scriptsize Research institute X}
-
 %% Multiple authors with multiple affiliations:
 \author{Thiago Santos Figueira$^{1}$
 \and Adriano Mendes Gil$^{1}$}
 \affiliation{\scriptsize $^{1}$Samsung Instituto de Desenvolvimento para a Informática da Amazônia
   (SIDIA)\\
   Manaus -- AM -- Brazil}
-
 
 %% Abstract section.
 %% Note how the keywords must be also included in this section!
@@ -79,16 +63,16 @@ Jogos desenvolvidos na \textit{Unity} seguem uma \textit{pipeline} gráfica onde
 Em outro âmbito, os controles ou \textit{joysticks} são uma das formas de interação com dispositivos de realidade virtual, no entanto, são passíveis de ruídos devido à presença de sensores baseados em magnetômetros, originando comportamentos indesejados como \textit{jittering} durante a leitura dos dados. 
 
 % Resumo proposta
-Neste trabalho, propomos o desenvolvimento de um jogo cujas representações gráficas sejam inteiramente fundamentadas em código de GPU ao passo que as restrições lógicas concentrem-se na CPU, de maneira a atuar nos diferentes estágios da \textit{pipeline} gráfica acima apresentada. Em alusão à um clássico, o jogo \textit{Snake} será recriado para os dispositivos de realidade virtual da Samsung em uma aplicação Unity, no entanto, diferencia-se do original à medida que o jogador posiciona o objeto coletável através do controlador tendo a finalidade de fazer a serpente persegui-lo. Neste aspecto, objetivando atenuar a inconsistência do controle e melhorar o reconhecimento dos sinais de entrada, aplica-se o filtro de Kalman ao \textit{joystick}.
+Neste trabalho, propomos o desenvolvimento de um jogo cujas representações gráficas sejam inteiramente fundamentadas em código de GPU ao passo que as restrições lógicas concentrem-se na CPU, de maneira a atuar nos diferentes estágios da \textit{pipeline} gráfica acima apresentada. Em alusão à um clássico, o jogo \textit{Snake} será recriado para o dispositivo de realidade virtual \textit{Samsung Galaxy S8} através do \textit{GearVR} com o controle de modelo ET-YO32 da Samsung, em uma aplicação Unity, no entanto, esta versão diferencia-se do original à medida que o jogador posiciona o objeto coletável através do controlador tendo a finalidade de fazer a serpente persegui-lo. Neste aspecto, objetivando atenuar a inconsistência do controle e melhorar o reconhecimento dos sinais de entrada, aplica-se o filtro de Kalman ao \textit{joystick}.
 
 % * Estrutura do artigo
-Analisa-se na seção \ref{sec:relatedworks} outros trabalhos que abordam sensores, uso de filtros e jogos de realidade virtual. Um esclarecimento sobre as regras do jogo desenvolvido pode ser encontrado na seção \ref{sec:vrsnake}. A arquitetura proposta é detalhada na seção \ref{sec:architecture}. Apresenta-se como um jogo de realidade virtual pode ser renderizado em uma esfera invertida na seção \ref{sec:invertedsphere}. Em \ref{sec:agent}, compreende-se a movimentação da \textit{snake} e sua arquitetura de renderização. A seção \ref{sec:gearvrcontroller} explana como ocorre a aplicação do filtro de Kalman no controle para VR. Resultados são discutidos na seção \ref{sec:results}. Por fim, pautam-se as conclusões e perspectivas de trabalhos futuros na seção \ref{sec:conclusion}.
+Este artigo está organizado como segue: analisa-se na seção \ref{sec:relatedworks} outros trabalhos que abordam sensores, uso de filtros e jogos de realidade virtual. Um esclarecimento sobre as regras do jogo desenvolvido pode ser encontrado na seção \ref{sec:vrsnake}. A arquitetura proposta é detalhada na seção \ref{sec:architecture}. Apresenta-se como um jogo de realidade virtual pode ser renderizado em uma esfera invertida na seção \ref{sec:invertedsphere}. Em \ref{sec:agent}, compreende-se a movimentação da \textit{snake} e sua arquitetura de renderização. A seção \ref{sec:gearvrcontroller} explana como ocorre a aplicação do filtro de Kalman no controle para VR. Resultados são discutidos na seção \ref{sec:results}. Por fim, pautam-se as conclusões e perspectivas de trabalhos futuros na seção \ref{sec:conclusion}.
 
 %-------------------------------------------------------------------------------------------------
 \section{Trabalhos Correlatos} \label{sec:relatedworks}
-O jogo bidimensional \textit{GPGPUWars} \cite{GPGPUWars} utiliza uma estrutura baseada em \textit{shader} similar à arquitetura apresentada aqui onde a GPU executa todo o processamento do jogo criado. Contudo, aplicações em realidade virtual diferem de outras aplicações devido à necessidade de preencher o espaço tridimensional de forma a fornecer conteúdo para 3 graus de liberdade(3DoF - \textit{3 Degrees of Freedom}). Por exemplo, a aplicação descrita em \cite{zund2015unfolding} utiliza visão computacional para geração de uma visão panorâmica de um jogo de console em 8-bits. Rodando em um Oculus Rift DK2, o jogador é posicionado no centro do mundo e à medida que movimenta seu personagem, o mundo se desdobra ao seu redor, estendendo a visão de jogo para as quatro paredes do ambiente virtual.
+O jogo bidimensional \textit{GPGPUWars} \cite{GPGPUWars} utiliza uma estrutura baseada em \textit{shader} similar à arquitetura apresentada aqui onde a GPU executa todo o processamento do jogo criado. Contudo, aplicações em realidade virtual diferem-se de outras aplicações uma vez que há a necessidade de preencher o espaço tridimensional de forma a fornecer conteúdo para 3 graus de liberdade (3DoF - \textit{3 Degrees of Freedom}). Por exemplo, a aplicação descrita em \cite{zund2015unfolding} utiliza visão computacional para geração de uma visão panorâmica de um jogo de console em 8-bits. Rodando em um \textit{Oculus Rift DK2}, o dispositivo de realidade virtual do \textit{Facebook}, o jogador é posicionado no centro do mundo e à medida que movimenta seu personagem, o mundo é revelado ao seu redor, estendendo a visão de jogo para as quatro paredes do ambiente virtual.
 
-Jogos VR são um grande potencializador de imersão, dada a sua capacidade de estimular a sensação de presença espacial e interatividade \cite{seibert2017control} através, por exemplo, dos controles VR, tal qual o modelo ET-YO32 da Samsung exibido na figura \ref{fig:vrcontroller}, que são classificados como de mapeamento natural tangível realístico e consoante a definição proposta por \cite{skalski2011mapping}, emulam de forma realista sua contrapartida no ambiente virtual, ou seja, movimenta-se a réplica do controle físico no espaço 3D da aplicação VR da mesma forma que se faz no mundo real.
+Jogos VR são um grande potencializador de imersão, dada a sua capacidade de estimular a sensação de presença espacial e interatividade \cite{seibert2017control} através, por exemplo, dos controles \textit{VR} como o modelo ET-YO32 da Samsung, que são classificados como de mapeamento natural tangível realístico e consoante a definição proposta por \cite{skalski2011mapping}, emulam de forma realista sua contrapartida no ambiente virtual, ou seja, movimenta-se a réplica do controle físico no espaço 3D da aplicação VR da mesma forma que se faz no mundo real.
 
 % 4 - Exemplos de filtragem de açoes dos controles (From ERIN17 paper. Refrasear)
 Certos trabalhos trazem a filtragem de sensores baseados no uso de acelerômetro, a exemplo: \cite{schlomer2008gesture} usa o modelo oculto de Markov para reconhecimento de gestos em um controle do \textit{Nintendo Wii}, a filtragem ocorre por meio de filtros simples para remover pontos que não são suficientemente expressivos. \cite{shiratori2008accelerometer}, por outro lado, utilizam múltiplos controles de \textit{Nintendo Wii} para gerar animações proceduralmente, o ruído é atenuado através do uso do filtro de Kalman.
@@ -106,7 +90,7 @@ Além disso, o comportamento de busca da serpente deve garantir que não há mov
 
 %-------------------------------------------------------------------------------------------------
 \section{Arquitetura de Visualização Baseada em Shader} \label{sec:architecture}
-Propomos uma arquitetura de duas camadas respectivamente responsáveis pelo gerenciamento lógico e visualização (ou renderização) da aplicação. A primeira fora desenvolvida em \textit{csharp}, portanto executada na unidade central de processamento (CPU, em inglês) e encarregada das tarefas inteligentes tais como a procura pelo objeto coletável e movimentação, além da aplicação do filtro de Kalman durante a leitura de dados do controle.
+Propomos uma arquitetura onde duas camadas são, respectivamente, responsáveis cada uma pelo gerenciamento lógico e gerenciamento de visualização (ou renderização) da aplicação. A primeira foi desenvolvida em \textit{csharp}, portanto executada na unidade central de processamento (CPU, em inglês) e encarregada das tarefas inteligentes tais como a procura pelo objeto coletável e movimentação, além da aplicação do filtro de Kalman durante a leitura de dados do controle.
 
 A segunda camada envolve um \textit{shader}, código executado diretamente na unidade de processamento gráfico (GPU, em inglês), incumbido de renderizar todos os itens apresentados no dispositivo de saída, que incluem o plano de fundo, o objeto coletável circular bem como os quadriláteros que representam o personagem ou a \textit{snake}.
 
@@ -119,11 +103,11 @@ A ilusão em um mundo virtual e consequente sensação de imersão requerem mate
 
 Uma esfera invertida, ou seja, uma esfera que tenha apenas seu lado interno renderizado, possibilita preencher completamente todo o campo de visão possível, além de ser a solução padrão adotada na exibição de imagens equiretangulares em 360 graus. A geração procedural de uma esfera pode seguir uma das duas abordagens abaixo:
 \begin{enumerate}
-  \begin{item} uma icosfera, i.e. uma esfera cujos vértices são distribuídos uniformemente; \end{item}
+  \begin{item} uma icosfera, i.e., uma esfera cujos vértices são distribuídos uniformemente; \end{item}
   \begin{item} geração de vertíces baseada em coordenadas de longitude/latitude. \end{item}
 \end{enumerate}
 
-Para este trabalho, preferiu-se a segunda abordagem devido a possibilidade de usar a longitude/latitude como forma de mapear as coordenadas de UV, através da conversão abaixo:
+Para este trabalho, preferiu-se a segunda abordagem devido a possibilidade de usar a longitude/latitude como forma de mapear as coordenadas de UV através da conversão abaixo:
 
 \begin{equation}
 R^2 \leftarrow R^3 : (\lambda, \theta) \rightarrow (x, y, z)

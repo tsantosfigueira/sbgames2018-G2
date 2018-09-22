@@ -3,7 +3,7 @@
 
 \documentclass{vgtc}                          % final (conference style)
 
-%% These three lines bring in essential packages: ``mathptmx'' for Type 1 
+%% These three lines bring in essential packages: ``mathptmx'' for Type 1
 %% typefaces, ``graphicx'' for inclusion of EPS figures. and ``times''
 %% for proper handling of the times font family.
 
@@ -44,7 +44,7 @@
 \smallskip
 
 \noindent \textbf{Keywords:} Unity, Kalman filter, shaders, virtual reality games.
-} 
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% START OF THE PAPER %%%%%%%%%%%%%%%%%%%%%%
@@ -56,11 +56,13 @@
 \maketitle
 
 %% do not uncomment this; use the \firstsection above
-%%\section{Introduction} 
+%%\section{Introduction}
 Jogos desenvolvidos na \textit{Unity} seguem uma \textit{pipeline} gráfica onde, em linhas gerais, a CPU (\textit{central processing unit}) é responsável por transmitir informações sobre elementos gráficos à GPU (\textit{graphics processing unit}) através do estágio de aplicação, onde os \textit{assets} gráficos, como modelos 3D e texturas, são carregados na VRAM (\textit{video random access memory}). Posteriormente, durante o estágio de geometria, os diferentes objetos que devem ser renderizados, seus respectivos posicionamentos e demais informes visuais relevantes são tratados pela GPU e no estágio de rasterização são convertidos em imagem \cite{akenine2008real}.
 
 % Contextualizar a Realidade Virtual e Controladores
-Em outro âmbito, os controles ou \textit{joysticks} são uma das formas de interação com dispositivos de realidade virtual, no entanto, são passíveis de ruídos devido à presença de sensores baseados em magnetômetros, originando comportamentos indesejados como \textit{jittering} durante a leitura dos dados. 
+Jogos de Realidade Virtual ou VR, da sigla em inglês (\textit{Virtual Reality}) são mais atraentes pela sua promessa de completa imersão. Para o desenvolvimento de aplicações VR, a Unity é a ferramenta de maior uso, encontrando-se assim muitas bibliotecas e componentes já prontos para auxiliar no desenvolmento.
+
+Os controles ou \textit{joysticks} são uma das formas de interação com dispositivos de realidade virtual, geralmente utilizando sensores baseados em magnetômetros, sendo assim passíveis de ruídos e originando comportamentos indesejados como imprecisão dos movimentos causada pelo \textit{jittering} durante a leitura dos dados.
 
 % Resumo proposta
 Neste trabalho, propomos o desenvolvimento de um jogo cujas representações gráficas sejam inteiramente fundamentadas em código de GPU ao passo que as restrições lógicas concentrem-se na CPU, de maneira a atuar nos diferentes estágios da \textit{pipeline} gráfica acima apresentada. Em alusão à um clássico, o jogo \textit{Snake} será recriado para o dispositivo de realidade virtual \textit{Samsung Galaxy S8} através do \textit{GearVR} com o controle de modelo ET-YO32 da Samsung, em uma aplicação Unity, no entanto, esta versão diferencia-se do original à medida que o jogador posiciona o objeto coletável através do controlador tendo a finalidade de fazer a serpente persegui-lo. Neste aspecto, objetivando atenuar a inconsistência do controle e melhorar o reconhecimento dos sinais de entrada, aplica-se o filtro de Kalman ao \textit{joystick}.
@@ -80,7 +82,7 @@ Certos trabalhos trazem a filtragem de sensores baseados no uso de acelerômetro
 %-------------------------------------------------------------------------------------------------
 \section{VRSnake} \label{sec:vrsnake}
 % Definição das regras do jogo
-O \textit{VRSnake} traz para a realidade virtual o clássico jogo 2D \textit{Snake}, mas diferentemente do original, o jogador assume controle sobre o posicionamento dos objetos coletáveis ao invés de controlar diretamente a serpente. Propomos então as seguintes regras: 
+O \textit{VRSnake} traz para a realidade virtual o clássico jogo 2D \textit{Snake}, mas diferentemente do original, o jogador assume controle sobre o posicionamento dos objetos coletáveis ao invés de controlar diretamente a serpente. Propomos então as seguintes regras:
 
 A serpente busca contínua e automaticamente o objeto coletável e cresce em uma unidade à medida que alcança este objeto.
 
@@ -161,23 +163,25 @@ y_{i} = \cos(\alpha_{latitude})
 \label{equation7}
 \end{equation}
 
-O raio $D_{yi}$ obtido em uma secção transversal na latitude $i$ é definido na equação \ref{equation8} como:
+O raio $D_{yi}$ obtido em uma secção transversal na latitude $i$ é definido na equação \ref{equation_coord_y} como:
 \begin{equation}
 D_{yi} = 2 * \sin(\alpha_{yi})
-\label{equation8}
+\label{equation_coord_y}
 \end{equation}
 
-Aplicando-se a equação \ref{equation8} nas equações \ref{equation3} e \ref{equation4} obtém-se as posições X e Z dos vértices da esfera em função de suas coordenadas de longitude e latitude.
+Aplicando-se a equação \ref{equation_coord_y} nas equações \ref{equation3} e \ref{equation4} obtém-se as posições X e Z dos vértices da esfera em função de suas coordenadas de longitude e latitude.
 
 \begin{equation}
 x_{i} = 2 * \sin(\alpha_{latitude}) * \sin(\alpha_{longitude})
-\label{equation9}
+\label{equation_coord_x}
 \end{equation}
 
 \begin{equation}
 z_{i} = 2 * \sin(\alpha_{latitude}) * \cos(\alpha_{longitude})
-\label{equation10}
+\label{equation_coord_z}
 \end{equation}
+
+Assim, ao utilizar as equações \ref{equation_coord_y}, \ref{equation_coord_x} e \ref{equation_coord_z}, é possível gerar proceduralmente os vertices da esfera onde o jogo será renderizado. As suas coordenadas de UV podem ser calculadas como o valor normalizado de latitude e longitude em cada vértice. Esses cálculos são utilizados para manipulação do movimento das \textit{snake} em uma textura de formato equiretangular.
 
 %-------------------------------------------------------------------------------------------------
 \section{Snake como um Agente Utilitário} \label{sec:agent}
@@ -207,7 +211,7 @@ Para a efetiva implementação do filtro de Kalman na leitura do controle de rea
 
 Desenvolveu-se em realidade virtual o jogo \textit{Snake} no ambiente de desenvolvimento \textit{Unity}. Gerou-se uma aplicação \textit{android} testada no \textit{Samsung Galaxy S8} através do \textit{GearVR} com o controle de modelo ET-YO32. A figura \ref{fig:VRPerformanceChart} abaixo ilustra a taxa de quadros no \textit{GearVR} através da ferramenta de avaliação de performance da \textit{Oculus}, o \textit{OVR Metrics Tool}:
 
-\begin{figure}[h!] 
+\begin{figure}[h!]
 \centering
 \includegraphics[width=\linewidth]{VRPerformance}
 \caption{Quadros-por-segundo conforme o OVR Metrics Tool executado durante o funcionamento da aplicação }
